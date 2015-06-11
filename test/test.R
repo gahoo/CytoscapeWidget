@@ -1,0 +1,16 @@
+devtools::install()
+library(CytoscapeWidget)
+option<-list(
+  elements=list(
+    nodes=list(
+      list(data=list(
+        id='foo')
+           ),
+      list(data=list(
+        id='bar')
+      )
+      )
+    )
+  )
+str(option)
+CytoscapeWidget(option)
