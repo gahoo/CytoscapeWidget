@@ -4,25 +4,10 @@ HTMLWidgets.widget({
 
   type: 'output',
 
-  initialize: function(el, width, height) {
-    var cy = cytoscape({
-      container: document.getElementById(el.id)
-    });
+  renderValue: function(el, options, instance) {
 
-    return {
-      // TODO: add instance fields as required
-      cy: cy
-    };
-
-  },
-
-  renderValue: function(el, x, instance) {
-
-  var cy = cytoscape({
-    container: document.getElementById(el.id),
-    elements: x.options.elements
-  });
-    // el.innerText = x.message;
+    options['container'] = document.getElementById(el.id);
+    var cy = cytoscape(options);
 
   },
 
