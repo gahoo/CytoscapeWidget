@@ -86,10 +86,28 @@ elementsOptions<-function(edges, nodes=NULL, ...){
   df2list<-function(df, ...){
     row2list<-function(x, ...){
       buildList<-function(df, x, columns){
+        
+        checkPosition<-function(columns){
+          position_name<-NULL
+          coordinate<-NULL
+          if('renderedPosition' %in% columns){
+            coordinate<-list(x=df[x, ]$x, y=df[x, ]$y)
+            position_name<-ifelse(df[x, 'renderedPosition'], 
+                                  'renderedPosition', 
+                                  'position')
+          }
+          list(name=position_name, coordinate=coordinate)
+        }
+        
+        position<-checkPosition(columns)
         #make sure class still dataframe
+        columns<-setdiff(columns, position$name)
         df<-subset(df[x,], select=columns)
         df_list<-as.list(df)
         df_list<-df_list[!is.na(df_list)]
+        if(!is.null(position$name)){
+          df_list[[position$name]]<-position$coordinate
+        }
         df_list
       }
       
@@ -105,9 +123,10 @@ elementsOptions<-function(edges, nodes=NULL, ...){
       df_list
     }
     
-    attribute_names<-c('classes', 'grabbable', 'locked', 'selectable', 'selected')
+    attribute_names<-c('classes', 'grabbable', 'locked', 'selectable',
+                       'selected', 'renderedPosition')
     attribute_names<-intersect(attribute_names, names(df))
-    data_names<-setdiff(names(df), attribute_names)
+    data_names<-setdiff(names(df), c(attribute_names,'x','y'))
     lapply(1:nrow(df), row2list, ...)
   }
   
@@ -118,12 +137,22 @@ elementsOptions<-function(edges, nodes=NULL, ...){
     }
   }
   
+  checkNodesPosition<-function(){
+    xyNumber<-sum(c('x' ,'y') %in% names(nodes))
+    if(xyNumber != 2){
+      stop("fix position without x, y")
+    }
+  }
+  
   if(is.null(nodes)){
     nodes<-as.character(unique(c(edges$source, edges$target)))
     nodesOptions<-lapply(nodes, function(x){list(data=list(id=x))})
   }else{
     if(!is.null(nodes$parent)){
       checkNodesParent()
+    }
+    if(!is.null(nodes$renderedPosition)){
+      checkNodesPosition()
     }
     nodesOptions<-df2list(nodes, ...)
   }

@@ -21,7 +21,7 @@ elements=list(
     )
   )
 layout=list(
-  name='circle',
+  name='preset',
   padding=30)
 
 style=list(
@@ -48,7 +48,9 @@ style<-styleOptions(style)
 jsonedit(style)
 
 edges<-data.frame(source=c(1:2,'kk'), target=c(2:1,1), p=1:3)
-nodes<-data.frame(id=c(1:2,'nk','kk'), desc=c('a','b','nk','kk'), parent=c('nk','nk',NA,NA), size=1:4*10, grabbable=T)
+nodes<-data.frame(id=c(1:2,'nk','kk'), desc=c('a','b','nk','kk'),
+                  parent=c('nk','nk',NA,NA), size=1:4*10, grabbable=T,
+                  renderedPosition=T, x=1:4*10, y=1:4*10)
 
 #
 elements<-elementsOptions(edges, nodes, grabbable=F, classes='fwef')
