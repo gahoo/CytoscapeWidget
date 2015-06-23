@@ -12,7 +12,8 @@ HTMLWidgets.widget({
   },
 
   resize: function(el, width, height, instance) {
-
+    var cy = document.getElementById(el.id).cytoscape('get');
+    cy.resize();
   }
 
 });
