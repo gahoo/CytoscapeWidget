@@ -58,12 +58,51 @@ CytoscapeWidget <- function(..., width = NULL, height = NULL) {
     layout_depends
   }
   
+  args2List<-function(options){
+    for(optionName in c('edges', 'style', 'layout')){
+      if(!is.null(options[[optionName]])){
+        if(optionName == 'edges'){
+          options[['elements']]<-smartArgs(options, optionName)
+        }else{
+          options[[optionName]]<-smartArgs(options, optionName)
+        }
+      }
+    }
+    options
+  }
+  
+  smartArgs<-function(options, optionName){
+    optionFunctions<-list()
+    optionFunctions[['elements']]<-elementsOptions
+    optionFunctions[['style']]<-styleOptions
+    optionFunctions[['layout']]<-layoutOptions
+    
+    option_class<-class(options[[optionName]])
+    if(option_class == 'character'){
+      if(optionName %in% c('elements', 'style')){
+        stop(sprintf("%s must be character, data.frame or list", optionName))
+      }
+      list(name=options[[optionName]])
+    }else if(option_class == 'data.frame'){
+      if(optionName == 'edges'){
+        optionFunctions[['elements']](edges = options[['edges']], nodes=options[['nodes']])
+      }else{
+        optionFunctions[[optionName]](options[[optionName]])
+      }
+    }else if(option_class == 'list'){
+      options[[optionName]]
+    }else{
+      stop(sprintf("%s must be character, data.frame or list", optionName))
+    }
+  }
   
 
   # forward options using x
   options = list(
     ...
   )
+  
+  options<-args2List(options)
   
   if(!is.null(options[['layout']])){
     layout_depends<-getLayoutDepends(options[['layout']][['name']])
@@ -145,7 +184,9 @@ elementsOptions<-function(edges, nodes=NULL, ...){
   }
   
   if(is.null(nodes)){
-    nodes<-as.character(unique(c(edges$source, edges$target)))
+    nodes<-sapply(edges[,c('source', 'target')], as.character)
+    dim(nodes)<-NULL
+    nodes<-unique(nodes)
     nodesOptions<-lapply(nodes, function(x){list(data=list(id=x))})
   }else{
     if(!is.null(nodes$parent)){
@@ -184,6 +225,24 @@ styleOptions<-function(style_df){
   selectors<-unique(as.character(style_df$selector))
   lapply(selectors, buildElementStyle)
   
+}
+
+layoutOptions<-function(layout_df){
+  layout<-lapply(1:nrow(layout_df), function(x){
+    with(layout_df[x,], {
+      if(type == 'JS'){
+        JS(value)
+      }else if(type == 'number'){
+        as.numeric(value)
+      }else if(type == 'bool'){
+        as.logical(value)
+      }else{
+        value
+      }
+    })
+  })
+  names(layout)<-layout_df$attribute
+  layout
 }
 
 #' Widget output function for use in Shiny

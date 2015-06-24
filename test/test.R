@@ -30,23 +30,6 @@ layout<-data.frame(attribute=c('name', 'padding', 'concentric', 'startAngle'),
                    type=c('char','number','JS', 'JS'),
                    stringsAsFactors=F)
 
-layoutOptions<-function(layout_df){
-  layout<-lapply(1:nrow(layout_df), function(x){
-    with(layout_df[x,], {
-      if(type == 'JS'){
-        JS(value)
-      }else if(type == 'number'){
-        as.numeric(value)
-      }else if(type == 'bool'){
-        as.logical(value)
-      }else{
-        value
-      }
-    })
-  })
-  names(layout)<-layout_df$attribute
-  layout
-}
 
 layout<-layoutOptions(layout)
 jsonedit(layout)
@@ -126,6 +109,13 @@ function ready(){
     });
 }")
 
-a<-CytoscapeWidget(elements=elements,layout=layout,style=style,ready=ready)
+a<-CytoscapeWidget(elements=elements,layout=layout,style=style,ready=ready,
+                   motionBlur=F, wheelSensitivity=0.1, textureOnViewport=T,
+                   hideEdgesOnViewport=T, hideLabelsOnViewport=T)
 a
 saveWidget(a,'test.html')
+
+a<-CytoscapeWidget(edges=edges, nodes=nodes,layout=layout,style=style,ready=ready,
+                   motionBlur=F, wheelSensitivity=0.1, textureOnViewport=T,
+                   hideEdgesOnViewport=T, hideLabelsOnViewport=T)
+a
